@@ -13,6 +13,8 @@ const argv = yargs
 	.describe('f', 'JSON file to parse')
 	.boolean('t')
 	.describe('t', 'Truncate output')
+	.nargs('r', 1) // tell yargs -f needs 1 argument after it
+	.describe('r', 'Filter by route name')
 	.argv;
 
 let table_data = new table({
@@ -38,8 +40,6 @@ if (file === '-') {
         });
 }
 
-console.log(js);
-
 function parse(str) {
         let js = JSON.parse(str)
 
@@ -55,7 +55,9 @@ function parse(str) {
                 dynamic_listener.active_state.listener.filter_chains.forEach(filter_chain => {
                         filter_chain.filters.forEach(filter => {
                                 if ((filter.name == 'envoy.filters.network.http_connection_manager') && (filter.typed_config.rds)) {
-                                        routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
+					if((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
+                                        	routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
+					}
                                 }
                         });
                 });
