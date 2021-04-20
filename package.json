@@ -1,0 +1,31 @@
+{
+  "name": "envoyctl",
+  "version": "0.1.0",
+  "description": "A CLI tool to help debugging Envoy",
+  "main": "envoyctl.js",
+  "keywords": "envoy",
+  "author": "Denis Jannot <djannot@gmail.com>",
+  "license": "GNU GPLv3",
+  "engines": {
+    "node": ">=10.12.0"
+  },
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djannot/envoyctl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/djannot/envoyctl/issues"
+  },
+  "homepage": "https://github.com/djannot/envoyctl",
+  "bin": {
+    "envoyctl": "./envoyctl.js"
+  },
+  "dependencies": {
+    "cli-table3": "^0.6.0",
+    "mississippi": "^4.0.0",
+    "yargs": "^16.2.0"
+  }
+}
