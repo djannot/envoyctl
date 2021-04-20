@@ -8,13 +8,15 @@ const argv = yargs
 	.usage('node envoy.json [options]')
 	.help('h')
 	.alias('h', 'help')
-	.demand('f') // require -f to run
-	.nargs('f', 1) // tell yargs -f needs 1 argument after it
+	.demand('f')
+	.nargs('f', 1)
 	.describe('f', 'JSON file to parse')
 	.boolean('t')
 	.describe('t', 'Truncate output')
-	.nargs('r', 1) // tell yargs -f needs 1 argument after it
-	.describe('r', 'Filter by route name')
+	.nargs('r', 1)
+	.describe('r', 'Only show entries for this route name')
+	.nargs('d', 1)
+	.describe('d', "Only show entries where at least a domain name matches this regular expressions.")
 	.argv;
 
 let table_data = new table({
@@ -40,6 +42,17 @@ if (file === '-') {
         });
 }
 
+function array_match(arr, expr) {
+	let found = false;
+	let regexp = new RegExp(expr, 'gi');
+	arr.forEach(item => {
+		if(regexp.test(item)) {
+			found = true;
+		}
+	});
+	return found;
+}
+
 function parse(str) {
         let js = JSON.parse(str)
 
@@ -55,7 +68,7 @@ function parse(str) {
                 dynamic_listener.active_state.listener.filter_chains.forEach(filter_chain => {
                         filter_chain.filters.forEach(filter => {
                                 if ((filter.name == 'envoy.filters.network.http_connection_manager') && (filter.typed_config.rds)) {
-					if((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
+					if ((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
                                         	routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
 					}
                                 }
@@ -72,10 +85,12 @@ function parse(str) {
         Object.keys(routes_by_dynamic_listeners).forEach(dynamic_listener => {
                 routes_by_dynamic_listeners[dynamic_listener].forEach(route => {
                         route_configs_by_route[route].virtual_hosts.forEach(virtual_host => {
-                                if (virtual_host.routes) {
-                                        virtual_host.routes.forEach(r => {
-                                                table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(r.route, null, 2)]);
-                                        });
+				if ((typeof argv.d === 'undefined') || (array_match(virtual_host.domains, argv.d))) {
+                        	        if (virtual_host.routes) {
+						virtual_host.routes.forEach(r => {
+                                                	table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(r.route, null, 2)]);
+                                        	});
+					}
                                 }
                         });
                 });
