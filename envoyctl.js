@@ -98,7 +98,7 @@ function parse(str) {
 				if ((typeof argv.d === 'undefined') || (array_match(virtual_host.domains, argv.d))) {
 					if (virtual_host.routes) {
 						virtual_host.routes.forEach(r => {
-							if('cluster' in r.route && r.route.cluster in endpoint_config_by_route) {
+							if(r.route && 'cluster' in r.route && r.route.cluster in endpoint_config_by_route) {
 								table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(r.route, null, 2), JSON.stringify(endpoint_config_by_route[r.route.cluster], null, 2)]);
 							} else {
 								table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(r.route, null, 2)]);
