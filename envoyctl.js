@@ -65,15 +65,17 @@ function parse(str) {
 	let listeners_config_dump = configs['type.googleapis.com/envoy.admin.v3.ListenersConfigDump'];
 	listeners_config_dump.dynamic_listeners.forEach(dynamic_listener => {
 		routes_by_dynamic_listeners[dynamic_listener.name] = [];
-		dynamic_listener.active_state.listener.filter_chains.forEach(filter_chain => {
-			filter_chain.filters.forEach(filter => {
-				if ((filter.name == 'envoy.filters.network.http_connection_manager') && (filter.typed_config.rds)) {
-					if ((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
-											routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
+		if ('active_state' in dynamic_listener) {
+			dynamic_listener.active_state.listener.filter_chains.forEach(filter_chain => {
+				filter_chain.filters.forEach(filter => {
+					if ((filter.name == 'envoy.filters.network.http_connection_manager') && (filter.typed_config.rds)) {
+						if ((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
+							routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
+						}
 					}
-				}
+				});
 			});
-		});
+		}
 	});
 
 	route_configs_by_route = {}
