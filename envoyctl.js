@@ -21,12 +21,12 @@ const argv = yargs
 	.argv;
 
 let table_data = new table({
-	head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Cluster', 'Per filter config']
+	head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster']
 });
 
 if (argv.t) {
 	table_data = new table({
-		head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Cluster', 'Per filter config'],
+		head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster'],
 		colWidths: [20, 30, 50, 50, 50, 50, 50]
 	});
 }
