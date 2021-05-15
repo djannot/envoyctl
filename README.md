@@ -39,7 +39,7 @@ It has been tested with both Gloo Edge and Istio.
 For example, to see the configuratin of the Istio ingress gateway:
 
 ```
-kubect-n istio-system port-forward deploy/istio-ingressgateway 15000 &
+kubectl -n istio-system port-forward deploy/istio-ingressgateway 15000 &
 PID=$!
 sleep 3
 curl localhost:15000/config_dump | envoyctl -f -
@@ -174,7 +174,7 @@ glooctl proxy dump > config_dump.json
 You can also get cluster details displayed if you include eds in the dump:
 
 ```
-kubect-n istio-system port-forward deploy/istio-ingressgateway 15000 &
+kubectl -n istio-system port-forward deploy/istio-ingressgateway 15000 &
 PID=$!
 sleep 3
 curl localhost:15000/config_dump?include_eds | envoyctl -f -
