@@ -49,7 +49,7 @@ kill $PID
 or with `istioctl` (>= 1.10):
 
 ```
-istioctl pc all deploy/istio-ingressgateway.istio-system -o json > config_dump.json
+istioctl pc all deploy/istio-ingressgateway.istio-system -o json | envoyctl -f -
 ```
 
 Here is an example of the output you can get:
@@ -168,7 +168,7 @@ Here is an example of the output you can get:
 Using `glooctl`:
 
 ```
-glooctl proxy dump > config_dump.json
+glooctl proxy dump | envoyctl -f -
 ```
 
 You can also get cluster details displayed if you include eds in the dump:
