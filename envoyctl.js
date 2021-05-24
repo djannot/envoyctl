@@ -21,13 +21,13 @@ const argv = yargs
 	.argv;
 
 let table_data = new table({
-	head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster']
+	head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster', 'Endpoints']
 });
 
 if (argv.t) {
 	table_data = new table({
-		head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster'],
-		colWidths: [20, 30, 50, 50, 50, 50, 50]
+		head: ['Dynamic listener', 'Route name', 'Domains', 'Match', 'Route', 'Per filter config', 'Cluster', 'Endpoints'],
+		colWidths: [20, 30, 50, 50, 50, 50, 50, 50]
 	});
 }
 
@@ -92,6 +92,14 @@ function parse(str) {
         }
     });
 
+	cluster_config_by_route = {};
+    if('type.googleapis.com/envoy.admin.v3.ClustersConfigDump' in configs) {
+        let clusters_config_dump = configs['type.googleapis.com/envoy.admin.v3.ClustersConfigDump'];
+        clusters_config_dump.dynamic_active_clusters.forEach(dynamic_active_cluster => {
+            cluster_config_by_route[dynamic_active_cluster.cluster.name] = dynamic_active_cluster.cluster;
+        });
+    }
+
 	endpoint_config_by_route = {};
 	if('type.googleapis.com/envoy.admin.v3.EndpointsConfigDump' in configs) {
 		let endpoints_config_dump = configs['type.googleapis.com/envoy.admin.v3.EndpointsConfigDump'];
@@ -110,10 +118,12 @@ function parse(str) {
 							if (r.route) route_to_display = r.route;
 							if (r.direct_response) route_to_display = r.direct_response;
 							let cluster_to_display;
-							if (r.route && 'cluster' in r.route && r.route.cluster in endpoint_config_by_route) cluster_to_display = endpoint_config_by_route[r.route.cluster];
+							cluster_to_display = cluster_config_by_route[r.route.cluster];
+                            let endpoints_to_display;
+                            if (r.route && 'cluster' in r.route && r.route.cluster in endpoint_config_by_route) endpoints_to_display = endpoint_config_by_route[r.route.cluster];
 							let per_filter_config_to_display;
 							if (r.typed_per_filter_config) per_filter_config_to_display = r.typed_per_filter_config;
-							table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(route_to_display, null, 2), JSON.stringify(per_filter_config_to_display, null, 2), JSON.stringify(cluster_to_display, null, 2)]);
+							table_data.push([dynamic_listener, route, virtual_host.domains.join("\n"), JSON.stringify(r.match, null, 2), JSON.stringify(route_to_display, null, 2), JSON.stringify(per_filter_config_to_display, null, 2), JSON.stringify(cluster_to_display, null, 2), JSON.stringify(endpoints_to_display, null, 2)]);
 						});
 					}
 				}
