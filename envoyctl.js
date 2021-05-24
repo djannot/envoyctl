@@ -69,11 +69,13 @@ function parse(str) {
 		if ('active_state' in dynamic_listener) {
 			dynamic_listener.active_state.listener.filter_chains.forEach(filter_chain => {
 				filter_chain.filters.forEach(filter => {
-					if ((filter.name == 'envoy.filters.network.http_connection_manager') && (filter.typed_config.rds)) {
-						if ((typeof argv.r === 'undefined') || (filter.typed_config.rds.route_config_name == argv.r)) {
-							routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
-						}
-					}
+					if (filter.name == 'envoy.filters.network.http_connection_manager') {
+                        if (filter.typed_config.rds) {
+                            routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.rds.route_config_name);
+                        } else {
+                            routes_by_dynamic_listeners[dynamic_listener.name].push(filter.typed_config.route_config.name);
+                        }
+                    }
 				});
 			});
 		}
@@ -84,6 +86,11 @@ function parse(str) {
 	routes_config_dump.dynamic_route_configs.forEach(dynamic_route_config => {
 			route_configs_by_route[dynamic_route_config.route_config.name] = dynamic_route_config.route_config;
 	});
+	routes_config_dump.static_route_configs.forEach(static_route_config => {
+        if (static_route_config.route_config.name) {
+            route_configs_by_route[static_route_config.route_config.name] = static_route_config.route_config;
+        }
+    });
 
 	endpoint_config_by_route = {};
 	if('type.googleapis.com/envoy.admin.v3.EndpointsConfigDump' in configs) {
